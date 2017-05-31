@@ -1,9 +1,9 @@
 import * as Swiper from 'swiper';
 
-import { NgZone, SimpleChanges, KeyValueDiffers } from '@angular/core';
+import { NgZone, PLATFORM_ID, Inject, SimpleChanges, KeyValueDiffers } from '@angular/core';
 import { Component, Optional, OnInit, DoCheck, OnDestroy, OnChanges } from '@angular/core';
 import { Input, Output, ViewChild, HostBinding, EventEmitter, ElementRef, ViewEncapsulation } from '@angular/core';
-
+import { isPlatformBrowser } from '@angular/common';
 import { SwiperConfig, SwiperConfigInterface, SwiperEvents } from './swiper.interfaces';
 
 @Component({
@@ -37,140 +37,143 @@ export class SwiperComponent implements OnInit, DoCheck, OnDestroy, OnChanges {
 
   @Output() indexChange = new EventEmitter<number>();
 
-  @Output('init'              ) s_init                = new EventEmitter<any>();
-  @Output('slideChangeStart'  ) s_slideChangeStart    = new EventEmitter<any>();
-  @Output('slideChangeEnd'    ) s_slideChangeEnd      = new EventEmitter<any>();
-  @Output('slideNextStart'    ) s_slideNextStart      = new EventEmitter<any>();
-  @Output('slideNextEnd'      ) s_slideNextEnd        = new EventEmitter<any>();
-  @Output('slidePrevStart'    ) s_slidePrevStart      = new EventEmitter<any>();
-  @Output('slidePrevEnd'      ) s_slidePrevEnd        = new EventEmitter<any>();
-  @Output('transitionStart'   ) s_transitionStart     = new EventEmitter<any>();
-  @Output('transitionEnd'     ) s_transitionEnd       = new EventEmitter<any>();
-  @Output('touchStart'        ) s_touchStart          = new EventEmitter<any>();
-  @Output('touchMove'         ) s_touchMove           = new EventEmitter<any>();
-  @Output('touchMoveOpposite' ) s_touchMoveOpposite   = new EventEmitter<any>();
-  @Output('sliderMove'        ) s_sliderMove          = new EventEmitter<any>();
-  @Output('touchEnd'          ) s_touchEnd            = new EventEmitter<any>();
-  @Output('click'             ) s_click               = new EventEmitter<any>();
-  @Output('tap'               ) s_tap                 = new EventEmitter<any>();
-  @Output('doubleTap'         ) s_doubleTap           = new EventEmitter<any>();
-  @Output('imagesReady'       ) s_imagesReady         = new EventEmitter<any>();
-  @Output('progress'          ) s_progress            = new EventEmitter<any>();
-  @Output('reachBeginning'    ) s_reachBeginning      = new EventEmitter<any>();
-  @Output('reachEnd'          ) s_reachEnd            = new EventEmitter<any>();
-  @Output('destroy'           ) s_destroy             = new EventEmitter<any>();
-  @Output('setTranslate'      ) s_setTranslate        = new EventEmitter<any>();
-  @Output('setTransition'     ) s_setTransition       = new EventEmitter<any>();
-  @Output('autoplay'          ) s_autoplay            = new EventEmitter<any>();
-  @Output('autoplayStart'     ) s_autoplayStart       = new EventEmitter<any>();
-  @Output('autoplayStop'      ) s_autoplayStop        = new EventEmitter<any>();
-  @Output('lazyImageLoad'     ) s_lazyImageLoad       = new EventEmitter<any>();
-  @Output('lazyImageReady'    ) s_lazyImageReady      = new EventEmitter<any>();
-  @Output('paginationRendered') s_paginationRendered  = new EventEmitter<any>();
-  @Output('scroll'            ) s_scroll              = new EventEmitter<any>();
+  @Output('init') s_init = new EventEmitter<any>();
+  @Output('slideChangeStart') s_slideChangeStart = new EventEmitter<any>();
+  @Output('slideChangeEnd') s_slideChangeEnd = new EventEmitter<any>();
+  @Output('slideNextStart') s_slideNextStart = new EventEmitter<any>();
+  @Output('slideNextEnd') s_slideNextEnd = new EventEmitter<any>();
+  @Output('slidePrevStart') s_slidePrevStart = new EventEmitter<any>();
+  @Output('slidePrevEnd') s_slidePrevEnd = new EventEmitter<any>();
+  @Output('transitionStart') s_transitionStart = new EventEmitter<any>();
+  @Output('transitionEnd') s_transitionEnd = new EventEmitter<any>();
+  @Output('touchStart') s_touchStart = new EventEmitter<any>();
+  @Output('touchMove') s_touchMove = new EventEmitter<any>();
+  @Output('touchMoveOpposite') s_touchMoveOpposite = new EventEmitter<any>();
+  @Output('sliderMove') s_sliderMove = new EventEmitter<any>();
+  @Output('touchEnd') s_touchEnd = new EventEmitter<any>();
+  @Output('click') s_click = new EventEmitter<any>();
+  @Output('tap') s_tap = new EventEmitter<any>();
+  @Output('doubleTap') s_doubleTap = new EventEmitter<any>();
+  @Output('imagesReady') s_imagesReady = new EventEmitter<any>();
+  @Output('progress') s_progress = new EventEmitter<any>();
+  @Output('reachBeginning') s_reachBeginning = new EventEmitter<any>();
+  @Output('reachEnd') s_reachEnd = new EventEmitter<any>();
+  @Output('destroy') s_destroy = new EventEmitter<any>();
+  @Output('setTranslate') s_setTranslate = new EventEmitter<any>();
+  @Output('setTransition') s_setTransition = new EventEmitter<any>();
+  @Output('autoplay') s_autoplay = new EventEmitter<any>();
+  @Output('autoplayStart') s_autoplayStart = new EventEmitter<any>();
+  @Output('autoplayStop') s_autoplayStop = new EventEmitter<any>();
+  @Output('lazyImageLoad') s_lazyImageLoad = new EventEmitter<any>();
+  @Output('lazyImageReady') s_lazyImageReady = new EventEmitter<any>();
+  @Output('paginationRendered') s_paginationRendered = new EventEmitter<any>();
+  @Output('scroll') s_scroll = new EventEmitter<any>();
 
   @ViewChild('swiperWrapper') swiperWrapper: ElementRef = null;
 
   @HostBinding('class.swiper') @Input() useSwiperClass: boolean = true;
 
-  constructor(private zone: NgZone, private elementRef: ElementRef, private differs: KeyValueDiffers,
-    @Optional() private defaults: SwiperConfig) {}
+  constructor(private zone: NgZone, @Inject(PLATFORM_ID) private platformId: Object, private elementRef: ElementRef, private differs: KeyValueDiffers,
+    @Optional() private defaults: SwiperConfig) { }
 
   ngOnInit() {
-    this.showButtons = false;
-    this.showScrollbar = false;
-    this.showPagination = false;
+    if (isPlatformBrowser(this.platformId)) {
+      this.showButtons = false;
+      this.showScrollbar = false;
+      this.showPagination = false;
 
-    let element = this.elementRef.nativeElement;
+      let element = this.elementRef.nativeElement;
 
-    let options = new SwiperConfig(this.defaults);
+      let options = new SwiperConfig(this.defaults);
 
-    options.assign(this.config); // Custom config
+      options.assign(this.config); // Custom config
 
-    if (this.initialIndex != null) {
-      options.initialSlide = this.initialIndex;
-    }
+      if (this.initialIndex != null) {
+        options.initialSlide = this.initialIndex;
+      }
 
-    if (options.scrollbar === true || options.scrollbar === '.swiper-scrollbar') {
-      this.showScrollbar = true;
-      options.scrollbar = element.querySelector('.swiper-scrollbar');
-    }
+      if (options.scrollbar === true || options.scrollbar === '.swiper-scrollbar') {
+        this.showScrollbar = true;
+        options.scrollbar = element.querySelector('.swiper-scrollbar');
+      }
 
-    if (options.pagination === true || options.pagination === '.swiper-pagination') {
-      this.showPagination = true;
+      if (options.pagination === true || options.pagination === '.swiper-pagination') {
+        this.showPagination = true;
 
-      options.pagination = element.querySelector('.swiper-pagination');
-    }
+        options.pagination = element.querySelector('.swiper-pagination');
+      }
 
-    if (options.prevButton === true || options.prevButton === '.swiper-button-prev') {
-      this.showButtons = true;
+      if (options.prevButton === true || options.prevButton === '.swiper-button-prev') {
+        this.showButtons = true;
 
-      options.prevButton = element.querySelector('.swiper-button-prev');
-    }
-    if (options.nextButton === true || options.nextButton === '.swiper-button-next') {
-      this.showButtons = true;
+        options.prevButton = element.querySelector('.swiper-button-prev');
+      }
+      if (options.nextButton === true || options.nextButton === '.swiper-button-next') {
+        this.showButtons = true;
 
-      options.nextButton = element.querySelector('.swiper-button-next');
-    }
+        options.nextButton = element.querySelector('.swiper-button-next');
+      }
 
-    if (!options['onSlideChangeStart']) {
-      options['onSlideChangeStart'] = (swiper) => {
-        this.zone.run(() => {
-          this.isAtLast = swiper.isEnd;
-          this.isAtFirst = swiper.isBeginning;
+      if (!options['onSlideChangeStart']) {
+        options['onSlideChangeStart'] = (swiper) => {
+          this.zone.run(() => {
+            this.isAtLast = swiper.isEnd;
+            this.isAtFirst = swiper.isBeginning;
 
-          this.indexChange.emit(swiper.snapIndex);
-        });
-      };
-    }
+            this.indexChange.emit(swiper.snapIndex);
+          });
+        };
+      }
 
-    if (!options['onScrollbarDragEnd']) {
-      options['onScrollbarDragEnd'] = (swiper) => {
-        this.zone.run(() => {
-          this.isAtLast = swiper.isEnd;
-          this.isAtFirst = swiper.isBeginning;
+      if (!options['onScrollbarDragEnd']) {
+        options['onScrollbarDragEnd'] = (swiper) => {
+          this.zone.run(() => {
+            this.isAtLast = swiper.isEnd;
+            this.isAtFirst = swiper.isBeginning;
 
-          this.indexChange.emit(swiper.snapIndex);
-        });
-      };
-    }
+            this.indexChange.emit(swiper.snapIndex);
+          });
+        };
+      }
 
-    if (!options['paginationBulletRender']) {
-      options['paginationBulletRender'] = (swiper, index, className) => {
-        if (this.swiper) {
-          if (index === 0) {
-            return '<span class="swiper-pagination-handle" index=' + index + '>' +
-              '<span class="' + className + ' ' + className + '-first"></span></span>';
-          } else if (index === (this.swiper.slides.length - 1)) {
-            return '<span class="swiper-pagination-handle" index=' + index + '>' +
-              '<span class="' + className + ' ' + className + '-last"></span></span>';
-          } else {
-            return '<span class="swiper-pagination-handle" index=' + index + '>' +
-              '<span class="' + className + ' ' + className + '-middle"></span></span>';
+      if (!options['paginationBulletRender']) {
+        options['paginationBulletRender'] = (swiper, index, className) => {
+          if (this.swiper) {
+            if (index === 0) {
+              return '<span class="swiper-pagination-handle" index=' + index + '>' +
+                '<span class="' + className + ' ' + className + '-first"></span></span>';
+            } else if (index === (this.swiper.slides.length - 1)) {
+              return '<span class="swiper-pagination-handle" index=' + index + '>' +
+                '<span class="' + className + ' ' + className + '-last"></span></span>';
+            } else {
+              return '<span class="swiper-pagination-handle" index=' + index + '>' +
+                '<span class="' + className + ' ' + className + '-middle"></span></span>';
+            }
           }
-        }
-      };
-    }
+        };
+      }
 
-    if (this.runInsideAngular) {
-      this.swiper = new Swiper(element.children[0], options);
-    } else {
-      this.zone.runOutsideAngular(() => {
+      if (this.runInsideAngular) {
         this.swiper = new Swiper(element.children[0], options);
+      } else {
+        this.zone.runOutsideAngular(() => {
+          this.swiper = new Swiper(element.children[0], options);
+        });
+      }
+
+
+      // Add native swiper event handling
+      SwiperEvents.forEach((eventName) => {
+        let self = this;
+
+        this.swiper.on(eventName, function (event) {
+          self[`s_${eventName}`].emit(event);
+        });
       });
-    }
 
-    // Add native swiper event handling
-    SwiperEvents.forEach((eventName) => {
-      let self = this;
-
-      this.swiper.on(eventName, function(event) {
-        self[`s_${eventName}`].emit(event);
-      });
-    });
-
-    if (!this.configDiff) {
-      this.configDiff = this.differs.find(this.config || {}).create(null);
+      if (!this.configDiff) {
+        this.configDiff = this.differs.find(this.config || {}).create(null);
+      }
     }
   }
 
@@ -265,15 +268,15 @@ export class SwiperComponent implements OnInit, DoCheck, OnDestroy, OnChanges {
     setTimeout(() => {
       if (this.swiper) {
         if (this.runInsideAngular) {
-            this.swiper.update();
+          this.swiper.update();
 
-            if (updateTranslate) {
-              setTimeout(() => {
-                if (this.swiper) {
-                  this.swiper.update(true);
-                }
-              }, 0);
-            }
+          if (updateTranslate) {
+            setTimeout(() => {
+              if (this.swiper) {
+                this.swiper.update(true);
+              }
+            }, 0);
+          }
         } else {
           this.zone.runOutsideAngular(() => {
             this.swiper.update();
