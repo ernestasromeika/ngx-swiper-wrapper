@@ -178,107 +178,107 @@ export class SwiperComponent implements OnInit, DoCheck, OnDestroy, OnChanges {
   }
 
   ngDoCheck() {
-    let changes = this.configDiff.diff(this.config || {});
+    if (isPlatformBrowser(this.platformId)) {
 
-    let children = this.swiperWrapper.nativeElement.children.length;
+      let changes = this.configDiff.diff(this.config || {});
 
-    if (changes) {
-      this.initialIndex = this.getIndex();
+      let children = this.swiperWrapper.nativeElement.children.length;
 
-      changes.forEachAddedItem((changed) => {
-        if (changed.key === 'initialSlide') {
-          this.initialIndex = this.config.initialSlide;
-        }
-      });
+      if (changes) {
+        this.initialIndex = this.getIndex();
 
-      this.ngOnDestroy();
+        changes.forEachAddedItem((changed) => {
+          if (changed.key === 'initialSlide') {
+            this.initialIndex = this.config.initialSlide;
+          }
+        });
 
-      // Timeout is needed for the styles to update properly
-      setTimeout(() => {
-        this.ngOnInit();
+        this.ngOnDestroy();
+
+        // Timeout is needed for the styles to update properly
+        setTimeout(() => {
+          this.ngOnInit();
+
+          this.update();
+        }, 0);
+      } else if (children !== this.childsDiff) {
+        this.childsDiff = children;
 
         this.update();
-      }, 0);
-    } else if (children !== this.childsDiff) {
-      this.childsDiff = children;
-
-      this.update();
+      }
     }
   }
 
   ngOnDestroy() {
-    if (this.swiper) {
-      if (this.runInsideAngular) {
-        this.swiper.destroy(true, true);
-      } else {
-        this.zone.runOutsideAngular(() => {
-          this.swiper.destroy(true, true);
-        });
-      }
+    if (isPlatformBrowser(this.platformId)) {
 
-      this.swiper = null;
+      if (this.swiper) {
+        if (this.runInsideAngular) {
+          this.swiper.destroy(true, true);
+        } else {
+          this.zone.runOutsideAngular(() => {
+            this.swiper.destroy(true, true);
+          });
+        }
+
+        this.swiper = null;
+      }
     }
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (this.swiper && changes['hidden'] && this.hidden) {
-      // For some reason resize causes Swiper to change index when hidden
-      this.initialIndex = this.swiper.activeIndex || 0;
-    }
+    if (isPlatformBrowser(this.platformId)) {
 
-    if (this.swiper && changes['hidden'] && !this.hidden) {
-      // For some reason resize causes Swiper to change index when hidden
-      this.swiper.activeIndex = this.initialIndex || 0;
-
-      this.update(true);
-    }
-
-    if (this.swiper && changes['disabled'] && !this.hidden) {
-      if (changes['disabled'].currentValue != changes['disabled'].previousValue) {
-        if (changes['disabled'].currentValue === true) {
-          if (this.runInsideAngular) {
-            this.swiper.lockSwipes();
-          } else {
-            this.zone.runOutsideAngular(() => {
-              this.swiper.lockSwipes();
-            });
-          }
-        } else if (changes['disabled'].currentValue === false) {
-          if (this.runInsideAngular) {
-            this.swiper.unlockSwipes();
-          } else {
-            this.zone.runOutsideAngular(() => {
-              this.swiper.unlockSwipes();
-            });
-          }
-        }
+      if (this.swiper && changes['hidden'] && this.hidden) {
+        // For some reason resize causes Swiper to change index when hidden
+        this.initialIndex = this.swiper.activeIndex || 0;
       }
 
-      this.update(false);
+      if (this.swiper && changes['hidden'] && !this.hidden) {
+        // For some reason resize causes Swiper to change index when hidden
+        this.swiper.activeIndex = this.initialIndex || 0;
+
+        this.update(true);
+      }
+
+      if (this.swiper && changes['disabled'] && !this.hidden) {
+        if (changes['disabled'].currentValue != changes['disabled'].previousValue) {
+          if (changes['disabled'].currentValue === true) {
+            if (this.runInsideAngular) {
+              this.swiper.lockSwipes();
+            } else {
+              this.zone.runOutsideAngular(() => {
+                this.swiper.lockSwipes();
+              });
+            }
+          } else if (changes['disabled'].currentValue === false) {
+            if (this.runInsideAngular) {
+              this.swiper.unlockSwipes();
+            } else {
+              this.zone.runOutsideAngular(() => {
+                this.swiper.unlockSwipes();
+              });
+            }
+          }
+        }
+
+        this.update(false);
+      }
     }
   }
 
   update(updateTranslate?: boolean) {
-    if (this.swiperWrapper) {
-      for (let i = 0; i < this.swiperWrapper.nativeElement.children.length; i++) {
-        this.swiperWrapper.nativeElement.children[i].classList.add('swiper-slide');
+    if (isPlatformBrowser(this.platformId)) {
+
+      if (this.swiperWrapper) {
+        for (let i = 0; i < this.swiperWrapper.nativeElement.children.length; i++) {
+          this.swiperWrapper.nativeElement.children[i].classList.add('swiper-slide');
+        }
       }
-    }
 
-    setTimeout(() => {
-      if (this.swiper) {
-        if (this.runInsideAngular) {
-          this.swiper.update();
-
-          if (updateTranslate) {
-            setTimeout(() => {
-              if (this.swiper) {
-                this.swiper.update(true);
-              }
-            }, 0);
-          }
-        } else {
-          this.zone.runOutsideAngular(() => {
+      setTimeout(() => {
+        if (this.swiper) {
+          if (this.runInsideAngular) {
             this.swiper.update();
 
             if (updateTranslate) {
@@ -288,86 +288,117 @@ export class SwiperComponent implements OnInit, DoCheck, OnDestroy, OnChanges {
                 }
               }, 0);
             }
-          });
-        }
+          } else {
+            this.zone.runOutsideAngular(() => {
+              this.swiper.update();
 
-        this.isAtFirst = this.swiper.isBeginning;
-        this.isAtLast = this.swiper.isEnd;
-      }
-    }, 0);
+              if (updateTranslate) {
+                setTimeout(() => {
+                  if (this.swiper) {
+                    this.swiper.update(true);
+                  }
+                }, 0);
+              }
+            });
+          }
+
+          this.isAtFirst = this.swiper.isBeginning;
+          this.isAtLast = this.swiper.isEnd;
+        }
+      }, 0);
+    }
   }
 
   getIndex() {
-    if (!this.swiper) {
-      return this.initialIndex;
-    } else {
-      return this.swiper.activeIndex;
+    if (isPlatformBrowser(this.platformId)) {
+      if (!this.swiper) {
+        return this.initialIndex;
+      } else {
+        return this.swiper.activeIndex;
+      }
     }
   }
 
   setIndex(index: number, speed?: number, callbacks?: boolean) {
-    if (!this.swiper || this.hidden) {
-      this.initialIndex = index;
-    } else {
-      if (this.runInsideAngular) {
-        this.swiper.slideTo(index, speed, callbacks);
+    if (isPlatformBrowser(this.platformId)) {
+
+      if (!this.swiper || this.hidden) {
+        this.initialIndex = index;
       } else {
-        this.zone.runOutsideAngular(() => {
+        if (this.runInsideAngular) {
           this.swiper.slideTo(index, speed, callbacks);
-        });
+        } else {
+          this.zone.runOutsideAngular(() => {
+            this.swiper.slideTo(index, speed, callbacks);
+          });
+        }
       }
     }
   }
 
   prevSlide(callbacks?: boolean, speed?: number) {
-    if (this.swiper) {
-      if (this.runInsideAngular) {
-        this.swiper.slidePrev(callbacks, speed);
-      } else {
-        this.zone.runOutsideAngular(() => {
+    if (isPlatformBrowser(this.platformId)) {
+
+      if (this.swiper) {
+        if (this.runInsideAngular) {
           this.swiper.slidePrev(callbacks, speed);
-        });
+        } else {
+          this.zone.runOutsideAngular(() => {
+            this.swiper.slidePrev(callbacks, speed);
+          });
+        }
       }
     }
   }
 
   nextSlide(callbacks?: boolean, speed?: number) {
-    if (this.swiper) {
-      if (this.runInsideAngular) {
-        this.swiper.slideNext(callbacks, speed);
-      } else {
-        this.zone.runOutsideAngular(() => {
+    if (isPlatformBrowser(this.platformId)) {
+
+      if (this.swiper) {
+        if (this.runInsideAngular) {
           this.swiper.slideNext(callbacks, speed);
-        });
+        } else {
+          this.zone.runOutsideAngular(() => {
+            this.swiper.slideNext(callbacks, speed);
+          });
+        }
       }
     }
   }
 
   stopPlay() {
-    if (this.swiper) {
-      if (this.runInsideAngular) {
-        this.swiper.stopAutoplay();
-      } else {
-        this.zone.runOutsideAngular(() => {
+    if (isPlatformBrowser(this.platformId)) {
+
+      if (this.swiper) {
+        if (this.runInsideAngular) {
           this.swiper.stopAutoplay();
-        });
+        } else {
+          this.zone.runOutsideAngular(() => {
+            this.swiper.stopAutoplay();
+          });
+        }
       }
     }
   }
 
   startPlay() {
-    if (this.swiper) {
-      if (this.runInsideAngular) {
-        this.swiper.startAutoplay();
-      } else {
-        this.zone.runOutsideAngular(() => {
+    if (isPlatformBrowser(this.platformId)) {
+
+      if (this.swiper) {
+        if (this.runInsideAngular) {
           this.swiper.startAutoplay();
-        });
+        } else {
+          this.zone.runOutsideAngular(() => {
+            this.swiper.startAutoplay();
+          });
+        }
       }
     }
   }
 
   onIndexSelect(event: any) {
-    this.setIndex(event.target.attributes.index.value);
+    if (isPlatformBrowser(this.platformId)) {
+      this.setIndex(event.target.attributes.index.value);
+    }
   }
 }

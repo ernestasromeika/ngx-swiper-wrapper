@@ -1,0 +1,19 @@
+"use strict";
+var swiper_component_1 = require("./swiper.component");
+exports.SwiperComponent = swiper_component_1.SwiperComponent;
+var swiper_directive_1 = require("./swiper.directive");
+exports.SwiperDirective = swiper_directive_1.SwiperDirective;
+var swiper_interfaces_1 = require("./swiper.interfaces");
+exports.coverflowObject = swiper_interfaces_1.coverflowObject;
+exports.cubeObject = swiper_interfaces_1.cubeObject;
+exports.fadeObject = swiper_interfaces_1.fadeObject;
+exports.flipObject = swiper_interfaces_1.flipObject;
+exports.SwiperConfig = swiper_interfaces_1.SwiperConfig;
+exports.SwiperEvents = swiper_interfaces_1.SwiperEvents;
+var swiper_module_1 = require("./swiper.module");
+exports.provideDefaultConfig = swiper_module_1.provideDefaultConfig;
+exports.provideForRootGuard = swiper_module_1.provideForRootGuard;
+exports.SWIPER_CONFIG = swiper_module_1.SWIPER_CONFIG;
+exports.SWIPER_GUARD = swiper_module_1.SWIPER_GUARD;
+exports.SwiperModule = swiper_module_1.SwiperModule;
+//# sourceMappingURL=index.js.map

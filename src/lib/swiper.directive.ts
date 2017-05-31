@@ -86,57 +86,65 @@ export class SwiperDirective implements OnInit, DoCheck, OnDestroy, OnChanges {
   }
 
   ngDoCheck() {
-    let changes = this.configDiff.diff(this.config || {});
+    if (isPlatformBrowser(this.platformId)) {
+      let changes = this.configDiff.diff(this.config || {});
 
-    if (changes) {
-      this.ngOnDestroy();
+      if (changes) {
+        this.ngOnDestroy();
 
-      // This is needed for the styles to update properly
-      setTimeout(() => {
-        this.ngOnInit();
+        // This is needed for the styles to update properly
+        setTimeout(() => {
+          this.ngOnInit();
 
-        this.update();
-      }, 0);
+          this.update();
+        }, 0);
+      }
     }
   }
 
   ngOnDestroy() {
-    if (this.swiper) {
-      if (this.runInsideAngular) {
-        this.swiper.destroy(true, true);
-      } else {
-        this.zone.runOutsideAngular(() => {
+    if (isPlatformBrowser(this.platformId)) {
+      if (this.swiper) {
+        if (this.runInsideAngular) {
           this.swiper.destroy(true, true);
-        });
-      }
+        } else {
+          this.zone.runOutsideAngular(() => {
+            this.swiper.destroy(true, true);
+          });
+        }
 
-      this.swiper = null;
+        this.swiper = null;
+      }
     }
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (this.swiper && changes['disabled']) {
-      if (changes['disabled'].currentValue != changes['disabled'].previousValue) {
-        if (changes['disabled'].currentValue === true) {
-          this.swiper.lockSwipes();
-        } else if (changes['disabled'].currentValue === false) {
-          this.swiper.unlockSwipes();
+    if (isPlatformBrowser(this.platformId)) {
+      if (this.swiper && changes['disabled']) {
+        if (changes['disabled'].currentValue != changes['disabled'].previousValue) {
+          if (changes['disabled'].currentValue === true) {
+            this.swiper.lockSwipes();
+          } else if (changes['disabled'].currentValue === false) {
+            this.swiper.unlockSwipes();
+          }
         }
       }
     }
   }
 
   update(updateTranslate?: boolean) {
-    setTimeout(() => {
-      if (this.swiper) {
-        if (this.runInsideAngular) {
-          this.swiper.update(updateTranslate);
-        } else {
-          this.zone.runOutsideAngular(() => {
+    if (isPlatformBrowser(this.platformId)) {
+      setTimeout(() => {
+        if (this.swiper) {
+          if (this.runInsideAngular) {
             this.swiper.update(updateTranslate);
-          });
+          } else {
+            this.zone.runOutsideAngular(() => {
+              this.swiper.update(updateTranslate);
+            });
+          }
         }
-      }
-    }, 0);
+      }, 0);
+    }
   }
 }
